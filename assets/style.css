@@ -165,3 +165,9 @@ dl.glossary .status { font-family: var(--sans); font-size: .68rem; text-transfor
   a { color: inherit; }
   h2 { break-after: avoid; }
 }
+
+/* Planned (not yet written) lessons on the index */
+table.planned td { color: var(--muted); }
+table.planned td:nth-child(2) { font-style: italic; color: var(--fg); opacity: .75; }
+.planned-intro { font-size: .9rem; color: var(--muted); }
+@media (max-width: 640px) { table.planned th:nth-child(4), table.planned td:nth-child(4) { display: none; } }

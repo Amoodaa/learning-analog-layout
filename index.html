@@ -23,6 +23,21 @@
   </tbody>
 </table>
 
+<h2>Possible next lessons</h2>
+<p class="planned-intro">Not written yet. This is a draft path, and the order and contents will change as the course goes on. The <span class="mono">~</span> numbers show rough order, not final lesson numbers.</p>
+<table class="planned">
+  <thead><tr><th>~#</th><th>Lesson</th><th>You'll be able to…</th><th>Interactive part</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">~2</td><td>ESD at the RX input: why the clamps are the biggest piece of the budget</td><td>Trace the discharge path from the pad to the supply clamp, and say where the metal must be wide and where it's only adding capacitance</td><td>Pick a diode size and routing width, and watch ESD robustness trade off against the input pole</td></tr>
+    <tr><td class="mono">~3</td><td>Termination resistor layout</td><td>Lay out R<sub>T</sub> so the two legs match, it meets current-density (EM) limits, and adds little capacitance; choose where the common-mode node connects</td><td>Spot what's wrong in sketches of termination layouts</td></tr>
+    <tr><td class="mono">~4</td><td>Return loss: the second spec your pad node has to meet</td><td>Explain why extra pad capacitance shows up as reflections, not just lost bandwidth, and read an S11 plot against a spec mask</td><td>Drag the capacitance and watch S11 cross the mask</td></tr>
+    <tr><td class="mono">~5</td><td>The bridged T-coil: what it does and how it's laid out</td><td>Explain how it hides the ESD capacitance; list the layout rules: symmetry, keep-out zones, coupling factor k, inductance in the ESD path</td><td>Change k and watch bandwidth and group delay respond, plus a layout review quiz</td></tr>
+    <tr><td class="mono">~6</td><td>CTLE input pair and offset</td><td>Use Pelgrom's rule (halving the offset takes 4× the area) and arrange FinFET fingers in a common-centroid pattern for the input pair and its degeneration R/C</td><td>Pick placements for a matched layout; offset estimate puzzles</td></tr>
+    <tr><td class="mono">~7</td><td>Differential routing from pad to CTLE</td><td>Route the pair with matched length, layer and neighbours; decide when to shield; avoid one-sided detours</td><td>Find the asymmetry in a set of route sketches</td></tr>
+    <tr><td class="mono">~8</td><td>Reading an extraction review</td><td>Read a StarRC report and point to the geometry behind the worst parasitics</td><td>Work through a made-up extraction report, finding causes and fixes</td></tr>
+  </tbody>
+</table>
+
 <h2>Reference</h2>
 <ul>
   <li><a href="reference/rx-front-end-cheatsheet.html">RX front-end cheat sheet</a>: formulas, the signal chain, who adds which capacitance</li>

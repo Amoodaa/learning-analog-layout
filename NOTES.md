@@ -25,5 +25,5 @@
 
 ## Publishing
 - Published via GitHub Pages from `main` (root): https://amoodaa.github.io/learning-analog-layout/ (repo Amoodaa/learning-analog-layout, public).
-- **When adding a lesson, add a row to `index.html`** and link the previous lesson's "Next" to it.
+- **When adding a lesson, add a row to `index.html`** (and remove/renumber its row in "Possible next lessons"), then link the previous lesson's "Next" to it.
 - The repo is public, so keep anything NDA-adjacent out of every file, including these notes.
