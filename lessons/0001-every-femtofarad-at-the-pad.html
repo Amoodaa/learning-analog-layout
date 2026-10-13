@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Every Femtofarad at the Pad</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="kicker">Lesson 0001 · SerDes RX front-end layout</div>
+  <h1>Every femtofarad at the pad</h1>
+  <p class="subtitle">How the RX input node sets a bandwidth ceiling, and why your layout decides where it is.</p>
+</header>
+
+<main>
+
+<div class="goal"><strong>Your win for today</strong>
+Given a capacitance budget for the RX pad node, compute the input pole and its loss at Nyquist, and name the layout features that feed each term. About 15 minutes.</div>
+
+<h2>The chain you'll be drawing</h2>
+
+<p>A wireline receiver front end is a short chain. The signal arrives at the bump and pad, meets the <strong>ESD</strong> clamps, meets the on-die <strong>termination</strong>, and enters the <strong>CTLE</strong> (continuous-time linear equalizer). The CTLE and the gain stages after it shape the signal for the sampler.<span class="note">The AFE "provides equalization (CTLE) and gain stages (VGA) to optimize the signal for symbol detection." Palermo, <a href="https://people.engr.tamu.edu/spalermo/ecen689/lecture6_ee720_rx_circuits.pdf">ECEN 720 L6</a>, slide 11.</span> Modern 56–112 Gb/s receivers also put a <strong>T-coil</strong> between the pad and the rest, a topic for a later lesson.<span class="note">Palermo L6, slides 8–9, shows the input networks of two ISSCC 2019 PAM4 receivers. In both, a T-coil "isolates ESD and input stage capacitance."</span></p>
+
+<figure>
+<svg viewBox="0 0 690 230" role="img" aria-label="Single-ended RX input node: pad, ESD, termination resistor, CTLE input, with parasitic capacitors to ground">
+  <!-- main signal line -->
+  <line x1="70" y1="70" x2="520" y2="70" class="stroke" stroke-width="2.5"/>
+  <!-- pad -->
+  <rect x="20" y="45" width="50" height="50" fill="none" class="stroke" stroke-width="2"/>
+  <text x="45" y="35" text-anchor="middle">pad</text>
+  <text x="20" y="112" class="fill-muted" font-size="11">from channel</text><text x="20" y="126" class="fill-muted" font-size="11">Z0 = 50 Ω</text>
+  <!-- ESD -->
+  <rect x="120" y="10" width="44" height="24" fill="none" class="stroke"/><text x="142" y="27" text-anchor="middle" font-size="11">ESD</text>
+  <line x1="142" y1="34" x2="142" y2="70" class="stroke"/>
+  <rect x="120" y="106" width="44" height="24" fill="none" class="stroke"/><text x="142" y="123" text-anchor="middle" font-size="11">ESD</text>
+  <line x1="142" y1="70" x2="142" y2="106" class="stroke"/>
+  <!-- termination -->
+  <line x1="250" y1="70" x2="250" y2="95" class="stroke"/>
+  <polyline points="250,95 242,100 258,108 242,116 258,124 250,129" fill="none" class="stroke" stroke-width="1.6"/>
+  <line x1="250" y1="129" x2="250" y2="145" class="stroke"/>
+  <text x="262" y="114" font-size="11">R<tspan baseline-shift="sub" font-size="8">T</tspan> = 50 Ω</text>
+  <text x="250" y="160" text-anchor="middle" class="fill-muted" font-size="11">to V<tspan baseline-shift="sub" font-size="8">CM</tspan></text>
+  <!-- CTLE -->
+  <polygon points="520,40 520,100 575,70" fill="none" class="stroke" stroke-width="2"/>
+  <text x="524" y="74" font-size="10">CTLE</text>
+  <line x1="575" y1="70" x2="610" y2="70" class="stroke"/>
+  <text x="614" y="74" font-size="11" class="fill-muted">→ sampler</text>
+  <!-- parasitic caps -->
+  <g class="stroke-accent" stroke-width="1.5" stroke-dasharray="3 2" fill="none">
+    <line x1="95" y1="70" x2="95" y2="185"/><line x1="200" y1="70" x2="200" y2="185"/>
+    <line x1="310" y1="70" x2="310" y2="185"/><line x1="400" y1="70" x2="400" y2="185"/><line x1="490" y1="70" x2="490" y2="185"/>
+  </g>
+  <g class="stroke-accent" stroke-width="2.2">
+    <line x1="85" y1="185" x2="105" y2="185"/><line x1="85" y1="191" x2="105" y2="191"/>
+    <line x1="190" y1="185" x2="210" y2="185"/><line x1="190" y1="191" x2="210" y2="191"/>
+    <line x1="300" y1="185" x2="320" y2="185"/><line x1="300" y1="191" x2="320" y2="191"/>
+    <line x1="390" y1="185" x2="410" y2="185"/><line x1="390" y1="191" x2="410" y2="191"/>
+    <line x1="480" y1="185" x2="500" y2="185"/><line x1="480" y1="191" x2="500" y2="191"/>
+  </g>
+  <g class="fill-accent" font-size="11" text-anchor="middle">
+    <text x="95" y="210" class="fill-accent">C_pad</text><text x="200" y="210" class="fill-accent">C_ESD</text>
+    <text x="310" y="210" class="fill-accent">C_RT</text><text x="400" y="210" class="fill-accent">C_route</text><text x="490" y="210" class="fill-accent">C_in</text>
+  </g>
+  <line x1="60" y1="222" x2="530" y2="222" class="stroke" stroke-width="1" opacity=".4"/>
+</svg>
+<figcaption>One leg of the differential input. The dashed capacitors are not components anyone placed. They come with the pad, the clamps, the resistor, your routing and the CTLE gates, and they all hang on <em>one node</em>.</figcaption>
+</figure>
+
+<h2>The node that sets the ceiling</h2>
+
+<p>Links are built to 50 Ω so the signal doesn't reflect.<span class="note">"Signal integrity considerations (min. reflections) requires 50 Ω" driver impedance. Palermo, <a href="https://people.engr.tamu.edu/spalermo/ecen620/lecture16_ee620_high_speed_io_overview.pdf">ECEN 620 High-Speed I/O</a>, slide 19.</span> At the RX pad, the incoming line looks like a 50 Ω source, and the on-die termination is another 50 Ω to the common-mode voltage. Since they're in parallel, the node sees only <strong>25 Ω</strong>, and every capacitor in the figure loads it. That makes a single pole:</p>
+
+<p class="eq">R<sub>eff</sub> = Z<sub>0</sub> ∥ R<sub>T</sub> = 25 Ω &nbsp;&nbsp;&nbsp; f<sub>p</sub> = 1 / (2π · R<sub>eff</sub> · C<sub>total</sub>)</p>
+
+<p>Compare that pole with the <strong>Nyquist frequency</strong>, half the symbol rate. That's where channel loss is quoted and where the eye is hurt most.<span class="note">"It is customary to specify the channel loss at the 'Nyquist frequency,' f<sub>Nyq</sub>, i.e., the frequency equal to half of the data rate." Razavi, <a href="https://www.seas.ucla.edu/brweb/papers/Journals/BR_SSCM_4_2021.pdf">"The Design of an Equalizer, Part One"</a>, SSC Magazine 2021.</span> PAM4 sends 2 bits per symbol, so 112 Gb/s PAM4 runs at 56 GBd and has the <em>same</em> 28 GHz Nyquist as 56 Gb/s NRZ.</p>
+
+<h3>Worked example (illustrative numbers)</h3>
+<p>Say the node carries 350 fF in total. Then f<sub>p</sub> = 1 / (2π · 25 Ω · 350 fF) ≈ <strong>18.2 GHz</strong>. At 56 Gb/s NRZ (Nyquist 28 GHz), one pole costs 20·log<sub>10</sub>(1/√(1 + (28/18.2)²)) ≈ <strong>−5.3 dB</strong> before the channel has done anything. The CTLE has to buy that back, and it pays in noise and power. Adding another 10 fF at this point lowers the pole by about 0.5 GHz.<span class="note">These capacitance values are made up to give a sense of scale. Compare them privately against your own PDK and extraction. Don't bring work numbers into this workspace.</span></p>
+
+<h2>Where the femtofarads come from: your layout</h2>
+
+<table>
+  <thead><tr><th>Term</th><th>Layout features that set it</th><th>Who usually owns it</th></tr></thead>
+  <tbody>
+    <tr><td>C<sub>pad</sub></td><td>Pad and bump metal area over substrate, metal under the pad, pad shielding</td><td>I/O / package + layout</td></tr>
+    <tr><td>C<sub>ESD</sub></td><td>Diode junction area and perimeter, set by the ESD current they must survive</td><td>ESD engineer + layout</td></tr>
+    <tr><td>C<sub>RT</sub></td><td>Resistor body over substrate or well, its contacts and wiring to the node</td><td><strong>Layout</strong></td></tr>
+    <tr><td>C<sub>route</sub></td><td>Width, length, layer choice and neighbours of the pad → CTLE wiring; via stacks</td><td><strong>Layout</strong></td></tr>
+    <tr><td>C<sub>in</sub></td><td>CTLE input-pair gates (designer sizes them); gate/MOL wiring and fingers (you)</td><td>Designer + layout</td></tr>
+  </tbody>
+</table>
+
+<p>Here is the main tension in this job. <strong>ESD wants big diodes and wide metal</strong>, because the discharge current has to flow somewhere without melting it. <strong>Bandwidth wants the smallest possible capacitance</strong> on this exact node. Galal & Razavi's answer was to hide the ESD capacitance behind a T-coil, which recovered 20 dB of return loss at 10 GHz in 0.18 µm.<span class="note"><a href="https://www.seas.ucla.edu/brweb/papers/Journals/G&RDec03_1.pdf">Galal & Razavi, JSSC Dec 2003</a>. T-coils get their own lesson later.</span> Before you reach for that, though, every fF of routing and resistor parasitics you avoid is bandwidth you get for free.</p>
+
+<h2>Play with the budget</h2>
+
+<p>Try these in order. <em>Predict before you drag.</em></p>
+<ol>
+  <li>With the defaults at 56 Gb/s NRZ, which term is the biggest lever? Halve it and see what the pole does.</li>
+  <li>Switch to 112 Gb/s PAM4. Why does the Nyquist frequency not move?</li>
+  <li>Find a budget that puts f<sub>p</sub> at or above 28 GHz. What's the total C? (Hold onto that number for the quiz.)</li>
+</ol>
+
+<div class="widget pole-budget" data-config='{
+  "items":[
+    {"name":"Pad + bump","c":100,"max":250},
+    {"name":"ESD diodes","c":150,"max":300},
+    {"name":"Termination R","c":20,"max":80},
+    {"name":"Routing","c":30,"max":120},
+    {"name":"CTLE input","c":50,"max":150}
+  ], "z0":50, "rt":50, "rate":56, "mod":"NRZ"}'></div>
+
+<h2>Retrieval practice</h2>
+<p><em>Don't scroll up.</em> Forcing the recall is the part that makes it stick.</p>
+
+<div class="widget quiz" data-answer="b">
+  <p class="q">1. A 50 Ω line drives an RX pad with 50 Ω on-die termination. What single-ended resistance does the pad-node capacitance see?</p>
+  <div class="opts">
+    <button class="opt" data-key="a">12.5 Ω</button>
+    <button class="opt" data-key="b">25.0 Ω</button>
+    <button class="opt" data-key="c">50.0 Ω</button>
+    <button class="opt" data-key="d">100.0 Ω</button>
+  </div>
+  <template class="explain">Looking back into a matched line you see Z<sub>0</sub>. In parallel with R<sub>T</sub>, that's 50 ∥ 50 = 25 Ω.</template>
+</div>
+
+<div class="widget quiz quiz-num" data-answer="15.9" data-tol="0.03" data-unit="GHz">
+  <p class="q">2. Same 25 Ω node, total capacitance 400 fF. Where is the input pole?</p>
+  <template class="explain">f<sub>p</sub> = 1 / (2π · 25 · 400×10<sup>−15</sup>) = 1 / (6.28×10<sup>−11</sup>) ≈ 15.9 GHz.</template>
+</div>
+
+<div class="widget quiz" data-answer="b">
+  <p class="q">3. What is the Nyquist frequency of a 112 Gb/s PAM4 link?</p>
+  <div class="opts">
+    <button class="opt" data-key="a">14 GHz</button>
+    <button class="opt" data-key="b">28 GHz</button>
+    <button class="opt" data-key="c">56 GHz</button>
+    <button class="opt" data-key="d">112 GHz</button>
+  </div>
+  <template class="explain">PAM4 carries 2 bits per symbol, so the link runs at 56 GBd. Nyquist is half the symbol rate: 28 GHz.</template>
+</div>
+
+<div class="widget quiz quiz-num" data-answer="227" data-tol="0.03" data-unit="fF">
+  <p class="q">4. To keep the input pole at or above 28 GHz on a 25 Ω node, what is the maximum total capacitance?</p>
+  <template class="explain">C = 1 / (2π · 25 · 28×10<sup>9</sup>) ≈ 227 fF. That one number covers the pad, ESD, termination, your routing and the CTLE gates combined.</template>
+</div>
+
+<div class="widget quiz" data-answer="a">
+  <p class="q">5. Which statement captures the central layout tension at the RX input node?</p>
+  <div class="opts">
+    <button class="opt" data-key="a">ESD current needs wide metal that adds pad capacitance</button>
+    <button class="opt" data-key="b">Termination resistors need long poly that lowers input impedance</button>
+    <button class="opt" data-key="c">Differential symmetry needs mirrored routes that double the delay</button>
+    <button class="opt" data-key="d">Guard rings need wide spacing that raises the input resistance</button>
+  </div>
+  <template class="explain">The discharge path has to be wide and the clamps large, but every fF they add sits on the 25 Ω node that sets the bandwidth. Resistor length sets R, not C to the node in any useful way. Mirroring doesn't double delay. Guard rings don't change R<sub>eff</sub>.</template>
+</div>
+
+<p class="score"></p>
+
+<h2>At work tomorrow</h2>
+<div class="win"><strong>Real-world step (≈ 20 min, stays at work)</strong>
+Pick any pad-connected net you've laid out, even a slow GPIO. Run your usual extraction (StarRC in a Custom Compiler flow) and list its total capacitance <em>by contributor</em>: pad, device, routing per layer. Rank the top three, and ask yourself which of them you could have changed. Keep the numbers at work. Bring back only the <em>ranking</em> and anything that surprised you.</div>
+
+<div class="source"><strong>Primary source</strong>
+Sam Palermo, <a href="https://people.engr.tamu.edu/spalermo/ecen689/lecture6_ee720_rx_circuits.pdf">ECEN 720 Lecture 6: RX Circuits</a> (Texas A&M, 2025). Read slides 5–11: the RX block diagram, two real T-coil input networks, and the analog front end. Ten minutes, and you'll recognize every block in this lesson.</div>
+
+<div class="ask"><strong>Ask your teacher</strong>
+Something unclear, or want to go deeper (why Z<sub>0</sub> looks like a resistor, what a T-coil actually does, how differential vs. common-mode termination changes this)? Ask in the chat. That's what I'm here for.</div>
+
+</main>
+
+<footer class="lesson-foot">
+  <nav class="pager">
+    <span>Reference: <a href="../reference/rx-front-end-cheatsheet.html">RX front-end cheat sheet</a> · <a href="../reference/glossary.html">Glossary</a></span>
+    <span><a href="../index.html">All lessons</a> · Next: ESD at the RX input (coming)</span>
+  </nav>
+</footer>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/pole-budget.js"></script>
+</body>
+</html>

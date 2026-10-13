@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RX Layout Glossary</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<header class="lesson-head" style="max-width:60rem;padding-right:16px">
+  <div class="kicker">Reference · SerDes RX front-end layout</div>
+  <h1>Glossary</h1>
+  <p class="subtitle">The canonical terms for this workspace. Every lesson uses these words and avoids the aliases. Terms marked <em>introduced</em> haven't yet been shown in practice. They become <em>known</em> once you've used them correctly.</p>
+</header>
+<main>
+
+<h2>Signal chain</h2>
+<dl class="glossary">
+  <dt>RX front end<span class="status">introduced</span></dt>
+  <dd>The part of the receiver from the bump to the sampler input: pad, ESD, T-coil, termination and analog front end. <span class="avoid">Avoid: input stage, RX analog (too vague)</span></dd>
+
+  <dt>Pad node<span class="status">introduced</span></dt>
+  <dd>The single electrical node (per leg) shared by the pad, ESD clamps, termination and the routing to the CTLE. Its total capacitance sets the input pole. <span class="avoid">Avoid: input net, RX pin</span></dd>
+
+  <dt>Termination (R<sub>T</sub>)<span class="status">introduced</span></dt>
+  <dd>The on-die resistor, matched to Z<sub>0</sub>, that absorbs the incoming wave so it doesn't reflect. <span class="avoid">Avoid: load resistor</span></dd>
+
+  <dt>CTLE<span class="status">introduced</span></dt>
+  <dd>Continuous-time linear equalizer: a degenerated differential pair that boosts high frequencies to undo channel loss. <span class="avoid">Avoid: peaking amp, linear EQ</span></dd>
+
+  <dt>T-coil<span class="status">introduced</span></dt>
+  <dd>A pair of coupled inductors (often with a bridge capacitor) that hides ESD and input capacitance from the line, extending bandwidth and improving return loss. <span class="avoid">Avoid: peaking coil, bridged inductor</span></dd>
+</dl>
+
+<h2>Bandwidth</h2>
+<dl class="glossary">
+  <dt>Input pole (f<sub>p</sub>)<span class="status">introduced</span></dt>
+  <dd>1/(2π·R<sub>eff</sub>·C<sub>total</sub>) of the pad node, where R<sub>eff</sub> = Z<sub>0</sub> ∥ R<sub>T</sub>. <span class="avoid">Avoid: input bandwidth, RC corner</span></dd>
+
+  <dt>Nyquist frequency (f<sub>N</sub>)<span class="status">introduced</span></dt>
+  <dd>Half the symbol rate. The frequency where channel loss is specified. <span class="avoid">Avoid: half-rate frequency</span></dd>
+
+  <dt>Symbol rate (baud)<span class="status">introduced</span></dt>
+  <dd>Symbols per second. It equals the bit rate for NRZ and half the bit rate for PAM4. <span class="avoid">Avoid: using "data rate" for this</span></dd>
+</dl>
+
+</main>
+<footer class="lesson-foot" style="max-width:60rem;padding-right:16px">
+  <nav class="pager"><a href="rx-front-end-cheatsheet.html">Cheat sheet</a><span>Updated: lesson 0001</span></nav>
+</footer>
+</body>
+</html>
